@@ -29,6 +29,9 @@ This repository contains a partial implementation of an Ant System algorithm [1]
 ```
 
 ## How to run the project
+
+Import this lib as well: https://pypi.org/project/tspsolve/
+
 You can run the script `ant-colony.py` with [Python 3](https://www.python.org/downloads/): 
 
 ```shell

@@ -1,5 +1,6 @@
 import numpy as np
-
+import operator
+import random
 from environment import Environment
 from ant import Ant 
 
@@ -29,7 +30,7 @@ class AntColony:
         for i in range(ant_population):
             
             # Initialize an ant on a random initial location 
-            ant = Ant(self.alpha, self.beta, None)
+            ant = Ant(self.alpha, self.beta, random.choice(self.environment.get_possible_locations()))
 
             # Position the ant in the environment of the ant colony so that it can move around
             ant.join(self.environment)
@@ -39,19 +40,48 @@ class AntColony:
 
     # Solve the ant colony optimization problem  
     def solve(self):
-
-        # The solution will be a list of the visited cities
+        shortest_distance = np.inf
         solution = []
 
-        # Initially, the shortest distance is set to infinite
-        shortest_distance = np.inf
+        self.environment.initialize_pheromone_map(self.ant_population)
+
+        differences = []
+        for i in range(self.iterations):
+            distances = []
+            best_ant = 0
+            best_distance = np.inf
+            for j, ant in enumerate(self.ants):
+                ant.run()
+                distances.append(ant.travelled_distance)
+
+                # Shortest of iteration
+                if ant.travelled_distance < best_distance:
+                    best_ant = i
+                    best_distance = ant.travelled_distance
+
+                # Shortest overall
+                if ant.travelled_distance < shortest_distance:
+                    shortest_distance = ant.travelled_distance
+                    solution = ant.path
+
+            differences.append(max(distances) - min(distances))
+            print(f'[{i+1:03d}] Shortest distance: {best_distance}')
+
+            self.environment.update_pheromone_map(self.ants)
+
+            if i != self.iterations - 1:
+                for ant in self.ants:
+                    ant.reset(random.choice(self.environment.get_possible_locations()))
+
+        # plotting
+        x = np.arange(1, self.iterations + 1)
+        y = np.array(differences)
 
         return solution, shortest_distance
 
-
 def main():
-    # Intialize the ant colony
-    ant_colony = AntColony(1, None, None, None, None)
+    # Initialize the ant colony
+    ant_colony = AntColony(50, 50, 1, 5, 0.3)
 
     # Solve the ant colony optimization problem
     solution, distance = ant_colony.solve()
@@ -59,5 +89,6 @@ def main():
     print("Distance: ", distance)
 
 
+
 if __name__ == '__main__':
-    main()    
+    main()
